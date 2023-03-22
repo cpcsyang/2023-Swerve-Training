@@ -4,18 +4,10 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.DriverStation;
+import org.littletonrobotics.junction.LoggedRobot;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.utility.AdvantageKitHelper;
-import frc.robot.utility.MacAddressUtil;
-import frc.robot.utility.RobotIdentity;
-import frc.robot.utility.config.RobotConfig;
-import org.littletonrobotics.junction.LoggedRobot;
-import org.littletonrobotics.junction.Logger;
-
-import java.io.IOException;
-import java.util.stream.Collectors;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -24,9 +16,9 @@ import java.util.stream.Collectors;
  * project.
  */
 public class Robot extends LoggedRobot {
-    private Command m_autonomousCommand;
+    private Command autonomousCommand;
 
-    private RobotContainer m_robotContainer;
+    private RobotContainer robotContainer;
 
     /**
      * This function is run when the robot is first started up and should be used for any
@@ -34,30 +26,9 @@ public class Robot extends LoggedRobot {
      */
     @Override
     public void robotInit() {
-        // Determine the robot identity
-        RobotIdentity identity = RobotIdentity.getIdentity();
-        System.out.println("=====Detected identity: " + identity);
-        RobotConfig config;
-        try {
-            config = RobotConfig.loadConfig(identity);
-        } catch (IOException e) {
-            DriverStation.reportError("Failed to load robot configuration", e.getStackTrace());
-            throw new RuntimeException(e);
-        }
-
-        Logger logger = AdvantageKitHelper.setupLogger(Constants.COMPETITION_MODE);
-
-        logger.recordMetadata("CompetitionMode", Boolean.toString(Constants.COMPETITION_MODE));
-        logger.recordMetadata("RobotIdentity", RobotIdentity.getIdentity().toString());
-
-        logger.recordMetadata("RobotMacAddresses",
-                MacAddressUtil.getMacAddresses().stream().collect(Collectors.joining(", ", "[", "]")));
-
-        logger.start();
-
         // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         // autonomous chooser on the dashboard.
-        m_robotContainer = new RobotContainer(config);
+        robotContainer = new RobotContainer();
     }
 
     /**
@@ -93,11 +64,11 @@ public class Robot extends LoggedRobot {
      */
     @Override
     public void autonomousInit() {
-        m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+        autonomousCommand = robotContainer.getAutonomousCommand();
 
         // schedule the autonomous command (example)
-        if (m_autonomousCommand != null) {
-            m_autonomousCommand.schedule();
+        if (autonomousCommand != null) {
+            autonomousCommand.schedule();
         }
     }
 
@@ -114,8 +85,8 @@ public class Robot extends LoggedRobot {
         // teleop starts running. If you want the autonomous to
         // continue until interrupted by another command, remove
         // this line or comment it out.
-        if (m_autonomousCommand != null) {
-            m_autonomousCommand.cancel();
+        if (autonomousCommand != null) {
+            autonomousCommand.cancel();
         }
     }
 
